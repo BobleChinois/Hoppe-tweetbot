@@ -10,31 +10,29 @@ OAUTH_TOKEN = "1110509646228480000-4YWPWBKLdwxIDqFPut86bUAWE1J7Xi"
 OAUTH_TOKEN_SECRET = "87jwWi9ITxfbr7t2T4qCG6r6uaVFtR7CayU33UO3gPwD8"
 
 twitter = Twython(APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
-pics_dir = os.path.join(os.path.dirname(__file__), 'pics')
+books_dir = os.path.join(os.path.dirname(__file__), 'books')
+memes_dir = os.path.join(os.path.dirname(__file__), 'memes')
 
-def parseSource(text):
-    # Identify 'Source:' using regex
-    m = re.search(r'(Source: )(.*)', text)
-    link = m.group(2)
-    # return a link
-    if link != None:
-        return link
-    else:
-        raise RuntimeError('No source')
+def parseText(text):
+    # Separate the quote from the link
+    m = re.search(r'(?P<quote>.*)(?P<link>(https.*)?)', text)
+    tweet = m.groupdict("")
+    # return a dict object with the quote and the link if any
+    return tweet
 
 def matchPic(link):
     # Match the following link with an image file
     if link == "https://mises.org/library/theory-socialism-and-capitalism-0":
         return 'ATSC.jpg'
-    elif link == "":
+    elif link == "https://mises.org/library/democracy-god-failed-1":
         return 'DGTF.jpg'
-    elif link == "":
+    elif link == "https://mises-media.s3.amazonaws.com/From%20Aristocracy%20to%20Monarchy%20to%20Democracy_Hoppe_Text%202014.pdf":
         return 'FATMTD.jpg'
-    elif link == "":
+    elif link == "https://mises.org/library/getting-libertarianism-right":
         return 'GLR.jpg'
-    elif link == "":
+    elif link == "https://mises.org/library/short-history-man-progress-and-decline":
         return 'SHM.jpg'
-    elif link == "":
+    elif link == "https://mises.org/library/economics-and-ethics-private-property-0":
         return 'TEEPP.jpg'
     else:
         return None
@@ -46,23 +44,28 @@ try:
 
     for line in buff[:]:
         line = line.strip(r'\n')
-        link = parseSource(line)
+        text = parseText(line) 
+        quote = '"' + text['quote'] + '"'
+        link = text['link']
+        tweet = quote + link
         link_length = len(link)
-        line_length = len(line) - link_length + 23
-        if line_length <= 280 and len(line)>0:
+        tweet_length = len(tweet) - link_length + 23
+        if tweet_length <= 280 and len(line) > 0:
             print("Tweeting...")
             source = matchPic(link)
             
             if source != None:
-                filename = os.path.join(pics_dir, source) 
+                filename = os.path.join(books_dir, source) 
             else:
-                filename = os.path.join(pics_dir, \
-                    choice(os.listdir(pics_dir))) 
+                filename = os.path.join(memes_dir, \
+                    choice(os.listdir(memes_dir))) 
 
             pic = open(filename, 'rb')
             response = twitter.upload_media(media=pic)
 
-            twitter.update_status(status=line, \
+            print(f"{tweet}")
+
+            twitter.update_status(status=tweet, \
                     media_ids=[response['media_id']])
             
             with open('quotes', 'w') as tweetfile:
@@ -71,7 +74,7 @@ try:
             print("Tweeted!")
             time.sleep(3600)
         else:
-            print("Skipped line - too long a quote")
+            print("Skipped line - too long or nothing")
             print(line, 'is ', line_length, 'long')
             continue
     print("No more lines to tweet...")
