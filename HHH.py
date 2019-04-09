@@ -31,6 +31,8 @@ def matchPic(link):
         return 'SHM.jpg'
     elif link == "https://mises.org/library/economics-and-ethics-private-property-0":
         return 'TEEPP.jpg'
+    elif link == "https://mises.org/library/social-democracy"
+        return 'SD.jpg'
     else:
         return None
 
@@ -72,8 +74,8 @@ try:
 
             print(f"{tweet}")
 
-            #twitter.update_status(status=tweet, \
-            #        media_ids=[response['media_id']])
+            twitter.update_status(status=tweet, \
+                    media_ids=[response['media_id']])
             
             print("Tweeted!")
             
@@ -81,9 +83,9 @@ try:
 
             print("Tooted!")
 
-            #with open('quotes', 'w') as tweetfile:
-            #    buff.remove(line)
-            #    tweetfile.writelines(buff)
+            with open('quotes', 'w') as tweetfile:
+                buff.remove(line)
+                tweetfile.writelines(buff)
             time.sleep(21600)
         else:
             print("Skipped line - too long or non-existent")

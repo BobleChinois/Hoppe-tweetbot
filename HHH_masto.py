@@ -11,7 +11,6 @@ def toot(tweet, filename):
 
     media_id = mastodon.media_post(filename)
 
-    #mastodon.status_post(tweet, media_ids=media_id)
-    print(tweet)
+    mastodon.status_post(tweet, media_ids=media_id)
 
     return('Tooted: ', tweet)
