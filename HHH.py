@@ -1,21 +1,28 @@
 from twython import Twython, TwythonError
-import time
-import os
+import time, os, re
 from random import choice 
-import re
 from HHH_masto import toot
 from importCredentials import importCredentials
 
-def parseText(text):
-    # Separate the quote from the link
-    tweet = {}
-    regex = r'(?P<quote>.*)?(?P<link>https.*)?'
+def getUrl(text):
+    # Separate the link from the rest of the line
+    
+    regex = r'https.*'
 
     m = re.search(regex, text)
 
-    tweet = m.groupdict("")
+    try:
+        url = m.group()
+        return url
+    except:
+        return None
 
-    return tweet
+def getQuote(text, url):
+    
+    raw_quote = re.split(url, text)
+    quote = raw_quote[0]
+
+    return quote
 
 def matchPic(link):
     # Match the following link with an image file
@@ -31,7 +38,7 @@ def matchPic(link):
         return 'SHM.jpg'
     elif link == "https://mises.org/library/economics-and-ethics-private-property-0":
         return 'TEEPP.jpg'
-    elif link == "https://mises.org/library/social-democracy"
+    elif link == "https://mises.org/library/social-democracy":
         return 'SD.jpg'
     else:
         return None
@@ -50,13 +57,19 @@ try:
     for line in buff[:]:
        
         line = line.strip(r'\n')
-        text = parseText(line) 
-        quote = '"' + text['quote'] + '"'
-        link = text['link']
-        tweet = quote + link
+        link = getUrl(line)
+        try:
+            link is not None
+            quote = '"' + getQuote(line, link) + '"'
+            print(quote)
+            tweet = quote + link
+            link_length = len(link)
+            tweet_length = len(tweet) - link_length + 23
 
-        link_length = len(link)
-        tweet_length = len(tweet) - link_length + 23
+        except:
+            quote = '"' + line + '"'
+            tweet = quote.strip('/n')
+            tweet_length = len(tweet)
 
         if tweet_length <= 280:
             print("Tweeting...")
